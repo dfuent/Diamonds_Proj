@@ -67,7 +67,7 @@ price_VG <- lm(price~carat,data=VG)
 
 # Create scatters:
 
-plot(carat, price, main="Bodyweight of the Baby and Mother's Age by Race")
+plot(carat, price, main="Price by Carat and Cut")
 points(I$carat, I$price, pch=2, col="blue")
 points(G$carat, G$price, pch=3, col="orange")
 points(VG$carat, VG$price, pch=4, col="red")
@@ -160,6 +160,12 @@ anova(t_price_mod)
 
 data_t <- diamonds_data[c('carat', 'clarity', 'color', 'cut', 'pt3_price')]
 
+head(data_t)
+
+t_full <- lm(pt3_price~., data = data_t)
+summary(t_full)
+anova(t_full)
+
 # redo scatters
 
 p_cut <- data_t[c('price', 'cut')]
@@ -179,13 +185,11 @@ price_I <- lm(pt3_price~carat,data=I)
 price_G <- lm(pt3_price~carat,data=G)
 price_VG <- lm(pt3_price~carat,data=VG)
 
-# summary(price_AI)
-
 # Astor Ideal is the reference
 
 # Create scatters:
 
-plot(carat, pt3_price, main="Bodyweight of the Baby and Mother's Age by Race")
+plot(carat, pt3_price, main="Price by Carat and Cut")
 points(I$carat, I$pt3_price, pch=2, col="blue")
 points(G$carat, G$pt3_price, pch=3, col="orange")
 points(VG$carat, VG$pt3_price, pch=4, col="red")
@@ -196,3 +200,38 @@ abline(price_G,lty=3, col="orange")
 abline(price_VG,lty=4, col="red")
 legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3, 4), pch=c(1,2,12), col=c("black", "blue", "orange", "red")) 
 
+# color:
+E <-subset(data_t,color=="E") 
+eF<-subset(data_t,color=="F") # f is a reserved variable
+G<-subset(data_t,color=="G") 
+H<-subset(data_t,color=="H") 
+I<-subset(data_t,color=="I") 
+J<-subset(data_t,color=="J") 
+
+# fit separate regressions
+price_E <- lm(pt3_price~carat,data=E)
+price_eF <- lm(pt3_price~carat,data=eF)
+price_G <- lm(pt3_price~carat,data=G)
+price_H <- lm(pt3_price~carat,data=H)
+price_I <- lm(pt3_price~carat,data=I)
+price_J <- lm(pt3_price~carat,data=J)
+
+levels(color)
+
+plot(carat, pt3_price, main="Price by Carat and Color")
+points(E$carat, E$pt3_price, pch=2, col="blue")
+points(eF$carat, eF$pt3_price, pch=3, col="orange")
+points(G$carat, G$pt3_price, pch=4, col="red")
+points(H$carat, H$pt3_price, pch=5, col="yellow")
+points(I$carat, I$pt3_price, pch=6, col="green")
+points(J$carat, J$pt3_price, pch=7, col="pink")
+
+abline(price_E,lty=1)
+abline(price_eF,lty=2, col="blue") 
+abline(price_G,lty=3, col="orange")
+abline(price_H,lty=4, col="red")
+abline(price_I,lty=5, col="yellow")
+abline(price_J,lty=6, col="green")
+abline(price_VG,lty=7, col="pink")
+
+legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3, 4), pch=c(1,2,12), col=c("black", "blue", "orange", "red")) 

@@ -76,7 +76,8 @@ abline(price_AI,lty=1)
 abline(price_I,lty=2, col="blue") 
 abline(price_G,lty=3, col="orange")
 abline(price_VG,lty=4, col="red")
-legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3, 4), pch=c(1,2,12), col=c("black", "blue", "orange", "red")) 
+legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3, 4), 
+       pch=c(1,2,12), col=c("black", "blue", "orange", "red")) 
 
 
 # Clearly a non-linear pattern in the data and lack of residual variance
@@ -166,6 +167,10 @@ t_full <- lm(pt3_price~., data = data_t)
 summary(t_full)
 anova(t_full)
 
+unique(cut)
+unique(color)
+unique(clarity)
+
 # redo scatters
 
 p_cut <- data_t[c('price', 'cut')]
@@ -198,9 +203,13 @@ abline(price_AI,lty=1)
 abline(price_I,lty=2, col="blue") 
 abline(price_G,lty=3, col="orange")
 abline(price_VG,lty=4, col="red")
-legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3, 4), pch=c(1,2,12), col=c("black", "blue", "orange", "red")) 
+legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3, 4), 
+       pch=c(1,2,12), col=c("black", "blue", "orange", "red")) 
+
+#colors()[1:50] # R colors for graphs
 
 # color:
+D <-subset(data_t,color=="E") 
 E <-subset(data_t,color=="E") 
 eF<-subset(data_t,color=="F") # f is a reserved variable
 G<-subset(data_t,color=="G") 
@@ -209,6 +218,7 @@ I<-subset(data_t,color=="I")
 J<-subset(data_t,color=="J") 
 
 # fit separate regressions
+price_D <- lm(pt3_price~carat,data=D)
 price_E <- lm(pt3_price~carat,data=E)
 price_eF <- lm(pt3_price~carat,data=eF)
 price_G <- lm(pt3_price~carat,data=G)
@@ -216,22 +226,65 @@ price_H <- lm(pt3_price~carat,data=H)
 price_I <- lm(pt3_price~carat,data=I)
 price_J <- lm(pt3_price~carat,data=J)
 
-levels(color)
-
 plot(carat, pt3_price, main="Price by Carat and Color")
-points(E$carat, E$pt3_price, pch=2, col="blue")
-points(eF$carat, eF$pt3_price, pch=3, col="orange")
-points(G$carat, G$pt3_price, pch=4, col="red")
-points(H$carat, H$pt3_price, pch=5, col="yellow")
-points(I$carat, I$pt3_price, pch=6, col="green")
-points(J$carat, J$pt3_price, pch=7, col="pink")
+points(E$carat, E$pt3_price, pch=2, col="chartreuse")
+points(eF$carat, eF$pt3_price, pch=3, col="blue")
+points(G$carat, G$pt3_price, pch=4, col="orange")
+points(H$carat, H$pt3_price, pch=5, col="red")
+points(I$carat, I$pt3_price, pch=6, col="bisque1")
+points(J$carat, J$pt3_price, pch=7, col="aquamarine")
 
-abline(price_E,lty=1)
-abline(price_eF,lty=2, col="blue") 
-abline(price_G,lty=3, col="orange")
-abline(price_H,lty=4, col="red")
-abline(price_I,lty=5, col="yellow")
-abline(price_J,lty=6, col="green")
-abline(price_VG,lty=7, col="pink")
+abline(price_D,lty=1, col = "black")
+abline(price_E,lty=2, col = "chartreuse")
+abline(price_eF,lty=3, col="blue") 
+abline(price_G,lty=4, col="orange")
+abline(price_H,lty=5, col="red")
+abline(price_I,lty=6, col="bisque1")
+abline(price_J,lty=7, col="aquamarine")
 
-legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3, 4), pch=c(1,2,12), col=c("black", "blue", "orange", "red")) 
+
+legend("topleft", c("D", "E", "F", "G", "H", "I", "J"), lty=c(1, 2, 3, 4, 5, 6, 7), 
+       pch=c(1,2,3,4,5,6,7), col=c("black", "chartreuse", "blue", "orange", "red", "bisque1", "aquamarine")) 
+
+# clarity:
+FL <-subset(data_t,clarity=="FL") 
+IF <-subset(data_t,clarity=="IF") 
+SI1 <-subset(data_t,clarity=="SI1") 
+SI2 <-subset(data_t,clarity=="SI2") 
+VS1 <-subset(data_t,clarity=="VS1") 
+VS2 <-subset(data_t,clarity=="VS2") 
+VVS1 <-subset(data_t,clarity=="VVS1") 
+VVS2 <-subset(data_t,clarity=="VVS2") 
+
+# fit separate regressions
+price_FL <- lm(pt3_price~carat,data=FL)
+price_IF <- lm(pt3_price~carat,data=IF)
+price_SI1 <- lm(pt3_price~carat,data=SI1)
+price_SI2 <- lm(pt3_price~carat,data=SI2)
+price_VS1 <- lm(pt3_price~carat,data=VS1)
+price_VS2 <- lm(pt3_price~carat,data=VS2)
+price_VVS1 <- lm(pt3_price~carat,data=VVS1)
+price_VVS2 <- lm(pt3_price~carat,data=VVS2)
+
+plot(carat, pt3_price, main="Price by Carat and Clarity")
+points(IF$carat, IF$pt3_price, pch=2, col="chartreuse")
+points(SI1$carat, SI1$pt3_price, pch=3, col="blue")
+points(SI2$carat, SI2$pt3_price, pch=4, col="orange")
+points(VS1$carat, VS1$pt3_price, pch=5, col="red")
+points(VS2$carat, VS2$pt3_price, pch=6, col="bisque1")
+points(VVS1$carat, VVS1$pt3_price, pch=7, col="aquamarine")
+points(VVS2$carat, VVS2$pt3_price, pch=8, col="burlywood")
+
+abline(price_FL,lty=1, col = "black")
+abline(price_IF,lty=2, col = "chartreuse")
+abline(price_SI1,lty=3, col="blue") 
+abline(price_SI2,lty=4, col="orange")
+abline(price_VS1,lty=5, col="red")
+abline(price_VS2,lty=6, col="bisque1")
+abline(price_VVS1,lty=7, col="aquamarine")
+abline(price_VVS2,lty=8, col="burlywood")
+
+
+legend("topleft", c("FL", "IF", "SI1", "SI2", "VS1", "VS2", "VVS1", "VVS2"), lty=c(1, 2, 3, 4, 5, 6, 7, 8), 
+       pch=c(1,2,3,4,5,6,7), col=c("black", "chartreuse", "blue", "orange", "red", "bisque1", "aquamarine", "burlywood")) 
+

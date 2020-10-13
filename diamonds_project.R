@@ -127,7 +127,7 @@ grid()
 # need to transform carat (looks like a non-linear relationship)
 # From the scatter plot, we see a potentially log or sqrt function
 
-diamonds_data <- mutate(diamonds_data, log_carat = log(carat), log_t_price = log(pt3_price))
+diamonds_data <- mutate(diamonds_data, log_carat = log(carat), log_t_price = log(price^(1/3)))
 
 head(diamonds_data)
 
@@ -137,7 +137,7 @@ t_both_mod <- lm(log_t_price~log_carat)
 
 summary(t_both_mod)
 
-plot(log_t_price~log_carat, main = "Price by Carat")
+plot(log_t_price~log_carat, main = "Log of Cuberoot Price by Log Carat")
 abline(t_both_mod, col = 'red')
 grid()
 
@@ -145,25 +145,28 @@ plot(t_both_mod$fitted.values, t_both_mod$residuals, main = 'Residual Plot') # r
 abline(h=0,col="red")
 grid()
 
+acf(t_both_mod$residuals)
+
 boxcox(t_both_mod, lambda = seq(0, .8, by = 0.1)) # Box-Cox plot
 
-# This second transformation didn't help, though the residuals LOOKED better and the model seemed linear, the Box-Cox
-# did not show constant residual variance. Looking back at the scatter, lower carat values didn't have constant residual
-# variance.
+# Though this is complicated, we can visually see that the graph is linear. We may want to explore the lag issues on the ACF, though
+# We notice that the Box-Cox plot does not show lambda = 1 in our confidence interval, but this could be due to the size of the dataset;
+# as n increases, small changes in residual variance become more pronounced and harder to 'pindown' in our Box-Cox plot.
 
-# We will stick with the 3/10ths transform on y as it passed the tests on regression variance 
-# model is t_price_mod
+# Note that our first model had a funneling out on the residual variance even though it had a an ideal Box-Cox
 
-summary(t_price_mod)
-anova(t_price_mod)
+# We can use this new model
 
-# it's clear that carat and price have a linear relationship -- F-val is 1.5e+04 w/ p-val 0.05 >> 2.2e-16
+summary(t_both_mod)
+anova(t_both_mod)
 
-data_t <- diamonds_data[c('carat', 'clarity', 'color', 'cut', 'pt3_price')]
+# it's clear that carat and price have a linear relationship -- F-val is huge w/ p-val 0.05 >> 2.2e-16
+
+data_t <- diamonds_data[c('log_carat', 'clarity', 'color', 'cut', 'log_t_price')]
 
 head(data_t)
 
-t_full <- lm(pt3_price~., data = data_t)
+t_full <- lm(log_t_price~., data = data_t)
 summary(t_full)
 anova(t_full)
 
@@ -173,9 +176,9 @@ unique(clarity)
 
 # redo scatters
 
-p_cut <- data_t[c('price', 'cut')]
-p_color <- data_t[c('price', 'color')]
-p_clarity <- data_t[c('price', 'clarity')]
+p_cut <- data_t[c('log_t_price', 'cut')]
+p_color <- data_t[c('log_t_price', 'color')]
+p_clarity <- data_t[c('log_t_price', 'clarity')]
 
 
 ## consider each cut as a subset
@@ -185,19 +188,19 @@ G<-subset(data_t,cut=="Good")
 VG<-subset(data_t,cut=="Very Good") 
 
 # fit separate regressions
-price_AI <- lm(pt3_price~carat,data=AI)
-price_I <- lm(pt3_price~carat,data=I)
-price_G <- lm(pt3_price~carat,data=G)
-price_VG <- lm(pt3_price~carat,data=VG)
+price_AI <- lm(log_t_price~log_carat,data=AI)
+price_I <- lm(log_t_price~log_carat,data=I)
+price_G <- lm(log_t_price~log_carat,data=G)
+price_VG <- lm(log_t_price~log_carat,data=VG)
 
 # Astor Ideal is the reference
 
 # Create scatters:
 
-plot(carat, pt3_price, main="Price by Carat and Cut")
-points(I$carat, I$pt3_price, pch=2, col="blue")
-points(G$carat, G$pt3_price, pch=3, col="orange")
-points(VG$carat, VG$pt3_price, pch=4, col="red")
+plot(log_carat, log_t_price, main="Price by Carat and Cut")
+points(I$log_carat, I$log_t_price, pch=2, col="blue")
+points(G$log_carat, G$log_t_price, pch=3, col="orange")
+points(VG$log_carat, VG$log_t_price, pch=4, col="red")
 
 abline(price_AI,lty=1)
 abline(price_I,lty=2, col="blue") 
@@ -218,21 +221,21 @@ I<-subset(data_t,color=="I")
 J<-subset(data_t,color=="J") 
 
 # fit separate regressions
-price_D <- lm(pt3_price~carat,data=D)
-price_E <- lm(pt3_price~carat,data=E)
-price_eF <- lm(pt3_price~carat,data=eF)
-price_G <- lm(pt3_price~carat,data=G)
-price_H <- lm(pt3_price~carat,data=H)
-price_I <- lm(pt3_price~carat,data=I)
-price_J <- lm(pt3_price~carat,data=J)
+price_D <- lm(log_t_price~log_carat,data=D)
+price_E <- lm(log_t_price~log_carat,data=E)
+price_eF <- lm(log_t_price~log_carat,data=eF)
+price_G <- lm(log_t_price~log_carat,data=G)
+price_H <- lm(log_t_price~log_carat,data=H)
+price_I <- lm(log_t_price~log_carat,data=I)
+price_J <- lm(log_t_price~log_carat,data=J)
 
-plot(carat, pt3_price, main="Price by Carat and Color")
-points(E$carat, E$pt3_price, pch=2, col="chartreuse")
-points(eF$carat, eF$pt3_price, pch=3, col="blue")
-points(G$carat, G$pt3_price, pch=4, col="orange")
-points(H$carat, H$pt3_price, pch=5, col="red")
-points(I$carat, I$pt3_price, pch=6, col="bisque1")
-points(J$carat, J$pt3_price, pch=7, col="aquamarine")
+plot(log_carat, log_t_price, main="Price by Carat and Color")
+points(E$log_carat, E$log_t_price, pch=2, col="chartreuse")
+points(eF$log_carat, eF$log_t_price, pch=3, col="blue")
+points(G$log_carat, G$log_t_price, pch=4, col="orange")
+points(H$log_carat, H$log_t_price, pch=5, col="red")
+points(I$log_carat, I$log_t_price, pch=6, col="bisque1")
+points(J$log_carat, J$log_t_price, pch=7, col="aquamarine")
 
 abline(price_D,lty=1, col = "black")
 abline(price_E,lty=2, col = "chartreuse")
@@ -257,23 +260,23 @@ VVS1 <-subset(data_t,clarity=="VVS1")
 VVS2 <-subset(data_t,clarity=="VVS2") 
 
 # fit separate regressions
-price_FL <- lm(pt3_price~carat,data=FL)
-price_IF <- lm(pt3_price~carat,data=IF)
-price_SI1 <- lm(pt3_price~carat,data=SI1)
-price_SI2 <- lm(pt3_price~carat,data=SI2)
-price_VS1 <- lm(pt3_price~carat,data=VS1)
-price_VS2 <- lm(pt3_price~carat,data=VS2)
-price_VVS1 <- lm(pt3_price~carat,data=VVS1)
-price_VVS2 <- lm(pt3_price~carat,data=VVS2)
+price_FL <- lm(log_t_price~log_carat,data=FL)
+price_IF <- lm(log_t_price~log_carat,data=IF)
+price_SI1 <- lm(log_t_price~log_carat,data=SI1)
+price_SI2 <- lm(log_t_price~log_carat,data=SI2)
+price_VS1 <- lm(log_t_price~log_carat,data=VS1)
+price_VS2 <- lm(log_t_price~log_carat,data=VS2)
+price_VVS1 <- lm(log_t_price~log_carat,data=VVS1)
+price_VVS2 <- lm(log_t_price~log_carat,data=VVS2)
 
-plot(carat, pt3_price, main="Price by Carat and Clarity")
-points(IF$carat, IF$pt3_price, pch=2, col="chartreuse")
-points(SI1$carat, SI1$pt3_price, pch=3, col="blue")
-points(SI2$carat, SI2$pt3_price, pch=4, col="orange")
-points(VS1$carat, VS1$pt3_price, pch=5, col="red")
-points(VS2$carat, VS2$pt3_price, pch=6, col="bisque1")
-points(VVS1$carat, VVS1$pt3_price, pch=7, col="aquamarine")
-points(VVS2$carat, VVS2$pt3_price, pch=8, col="burlywood")
+plot(log_carat, log_t_price, main="Price by Carat and Clarity")
+points(IF$log_carat, IF$log_t_price, pch=2, col="chartreuse")
+points(SI1$log_carat, SI1$log_t_price, pch=3, col="blue")
+points(SI2$log_carat, SI2$log_t_price, pch=4, col="orange")
+points(VS1$log_carat, VS1$log_t_price, pch=5, col="red")
+points(VS2$log_carat, VS2$log_t_price, pch=6, col="bisque1")
+points(VVS1$log_carat, VVS1$log_t_price, pch=7, col="aquamarine")
+points(VVS2$log_carat, VVS2$log_t_price, pch=8, col="burlywood")
 
 abline(price_FL,lty=1, col = "black")
 abline(price_IF,lty=2, col = "chartreuse")

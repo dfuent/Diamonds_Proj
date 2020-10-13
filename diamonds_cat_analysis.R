@@ -25,12 +25,12 @@ head(diamonds_data)
 attach(diamonds_data)
 
 boxplot(log_carat~cut, main="Boxplot of Carat and Cut")
-boxplot(log_carat~color, main="Boxplot of Carat and Cut")
-boxplot(log_carat~clarity, main="Boxplot of Carat and Cut")
+boxplot(log_carat~color, main="Boxplot of Carat and Color")
+boxplot(log_carat~clarity, main="Boxplot of Carat and Clarity")
 
-boxplot(log_t_price~cut, main="Boxplot of Carat and Cut")
-boxplot(log_t_price~color, main="Boxplot of Carat and Cut")
-boxplot(log_t_price~clarity, main="Boxplot of Carat and Cut")
+boxplot(log_t_price~cut, main="Boxplot of Price and Cut")
+boxplot(log_t_price~color, main="Boxplot of Price and Cut")
+boxplot(log_t_price~clarity, main="Boxplot of Price and Cut")
 
 t_full <- lm(log_t_price~., data = diamonds_data)
 summary(t_full)
@@ -327,3 +327,11 @@ m_clarity <- lm(log_t_price~log_carat + cl_group)
 pairwise<-glht(m_clarity, linfct = mcp(cl_group= "Tukey"))
 summary(pairwise)
 
+
+boxplot(log_carat~cut_group, main="Boxplot of Carat and Cut")
+boxplot(log_carat~col_group, main="Boxplot of Carat and Color")
+boxplot(log_carat~cl_group, main="Boxplot of Carat and Clarity")
+
+boxplot(log_t_price~cut_group, main="Boxplot of Price and Cut")
+boxplot(log_t_price~col_group, main="Boxplot of Price and Color")
+boxplot(log_t_price~cl_group, main="Boxplot of Price and Clarity")

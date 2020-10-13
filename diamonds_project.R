@@ -7,6 +7,7 @@ library(dplyr)
 diamonds_data<-read.csv("diamonds4.csv", header=TRUE)
 #diamonds_data # display data when uncommented
 
+summary(diamonds_data)
 attach(diamonds_data) # attach
 
 head(diamonds_data)
@@ -18,9 +19,9 @@ is.factor(clarity)
 is.factor(color)
 is.factor(cut)
 
-clarity <- factor(clarity)
-color <- factor(color)
-cut <- factor(cut)
+clarity <- factor(clarity, levels = c('SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'))
+color <- factor(color, levels = c('J', 'I', 'H', 'G', 'F', 'E', 'D'))
+cut <- factor(cut, levels = c('Good', 'Very Good', 'Ideal', 'Astor Ideal'))
 
 # 2) View Levels:
 
@@ -39,6 +40,12 @@ is.numeric(price)
 r_full <- lm(price~., data = diamonds_data)
 summary(r_full)
 anova(r_full)
+
+# 5) check n per each categorical variable
+
+count(diamonds_data, c(cut))
+count(diamonds_data, c(clarity))
+count(diamonds_data, c(color))
 
 # Begin to set up scatters:
 
@@ -291,3 +298,17 @@ abline(price_VVS2,lty=8, col="burlywood")
 legend("topleft", c("FL", "IF", "SI1", "SI2", "VS1", "VS2", "VVS1", "VVS2"), lty=c(1, 2, 3, 4, 5, 6, 7, 8), 
        pch=c(1,2,3,4,5,6,7), col=c("black", "chartreuse", "blue", "orange", "red", "bisque1", "aquamarine", "burlywood")) 
 
+
+# Tukey tests
+library(lawstat)
+library(multcomp)
+
+
+pairwise<-glht(t_full, linfct = mcp(data_t$cut = "Tukey"))
+summary(pairwise)
+
+pairwise<-glht(t_full, linfct = mcp(clarity= "Tukey"))
+summary(pairwise)
+
+pairwise<-glht(t_full, linfct = mcp(color= "Tukey"))
+summary(pairwise)

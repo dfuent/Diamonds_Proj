@@ -330,12 +330,12 @@ pairwise<-glht(m_clarity, linfct = mcp(cl_group= "Tukey"))
 summary(pairwise)
 
 
-boxplot(log_carat~cut_group, main="Boxplot of log Carat and Cut")
-boxplot(log_carat~col_group, main="Boxplot of log Carat and Color")
-boxplot(log_carat~cl_group, main="Boxplot of log Carat and Clarity")
+boxplot(log_carat~cut_group, main="Boxplot of log Carat and Grouped Cut")
+boxplot(log_carat~col_group, main="Boxplot of log Carat and Grouped Color")
+boxplot(log_carat~cl_group, main="Boxplot of log Carat and Grouped Clarity")
 
-boxplot(log_price~cut_group, main="Boxplot of log Price and Cut")
-boxplot(log_price~col_group, main="Boxplot of log Price and Color")
-boxplot(log_price~cl_group, main="Boxplot of log Price and Clarity")
+boxplot(log_price~cut_group, main="Boxplot of log Price and Grouped Cut")
+boxplot(log_price~col_group, main="Boxplot of log Price and Grouped Color")
+boxplot(log_price~cl_group, main="Boxplot of log Price and Grouped Clarity")
 
 

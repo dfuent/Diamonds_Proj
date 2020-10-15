@@ -164,7 +164,7 @@ price_H <- lm(log_price~log_carat,data=H)
 price_I <- lm(log_price~log_carat,data=I)
 price_J <- lm(log_price~log_carat,data=J)
 
-plot(log_carat, log_price, main="Price by log Carat and Color")
+plot(log_carat, log_price, main="Price by Carat and Color")
 points(E$log_carat, E$log_price, pch=2, col="chartreuse")
 points(eF$log_carat, eF$log_price, pch=3, col="blue")
 points(G$log_carat, G$log_price, pch=4, col="orange")
@@ -184,6 +184,8 @@ legend("topleft", c("D", "E", "F", "G", "H", "I", "J"), lty=c(1, 2, 3, 4, 5, 6, 
        pch=c(1,2,3,4,5,6,7), col=c("black", "chartreuse", "blue", "orange", "red", "bisque1", "aquamarine")) 
 
 count(diamonds_data, c(color))
+
+count(diamonds_data, c(clarity))
 
 best_col <- c('D', 'E', 'F', 'G', 'H') # all but bottom 2
 
@@ -210,6 +212,13 @@ abline(price_bottomc,lty=2, col = "red")
 legend("topleft", c("Top Colors", "Bottom Colors"), lty=c(1, 2), 
        pch=c(1,2), col=c("black", "red")) 
 
+plot(price_topc$fitted.values, price_topc$residuals, main = 'Residual Plot')
+abline(h=0,col="red")
+grid()
+
+plot(price_bottomc$fitted.values, price_bottomc$residuals, main = 'Residual Plot')
+abline(h=0,col="red")
+grid()
 
 
 is.factor(col_group)
@@ -275,8 +284,8 @@ legend("topleft", c("FL", "IF", "VVS1", "VVS2", "VS1", "VS2", "SI1", "SI2"), lty
        pch=c(1,2,3,4,5,6,7), col=c("black", "chartreuse", "aquamarine", "burlywood", "red", "bisque1", "blue", "orange")) 
 
 
-fl_cl <- c('FL', 'IF')
-vs_cl <- c('VVS1', 'VVS2', 'VS1', 'VS2')
+fl_cl <- c('FL', 'IF', 'VVS1', 'VVS2')
+vs_cl <- c('VS1', 'VS2')
 
 
 diamonds_data$cl_group <- ifelse(diamonds_data$clarity %in% fl_cl, 
@@ -339,3 +348,39 @@ boxplot(log_price~col_group, main="Boxplot of log Price and Grouped Color")
 boxplot(log_price~cl_group, main="Boxplot of log Price and Grouped Clarity")
 
 
+m_clarity <- lm(log_price~log_carat + cl_group)
+
+summary(m_clarity)
+summary(m_col)
+summary(m_cut)
+
+m_group <- lm(log_price~log_carat + col_group + cl_group + cut_group)
+m_group2 <- lm(log_price~log_carat + col_group + cl_group)
+
+
+m_col_int <- lm(log_price~ log_carat*col_group)
+m_simple <- lm(log_price~ log_carat)
+
+m_cl_int <- lm(log_price~ log_carat*cl_group)
+m_cut_int <- lm(log_price~ log_carat*cut_group)
+
+summary(m_group)
+summary(m_col_int)
+summary(m_col)
+
+summary(m_col_int)
+summary(m_cl_int)
+summary(m_cut_int)
+
+
+anova(m_col_int, m_simple)
+
+anova(m_col, m_col_int)
+
+anova(m_cut, m_group)
+anova(m_col, m_group)
+anova(m_col_int, m_group)
+anova(m_clarity, m_group)
+anova(m_simple, m_group)
+
+anova(m_group2, m_group)

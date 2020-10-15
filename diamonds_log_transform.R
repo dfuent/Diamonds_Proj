@@ -193,6 +193,6 @@ t_both_mod <- lm(log_price~log_carat)
 summary(t_both_mod)
 anova(t_both_mod)
 
-# it's clear that carat and price have a linear relationship -- F-val is huge w/ p-val 0.05 >> 2.2e-16
+# it's clear that carat and price have a linear relationship -- F-val is huge w/ p-val 2.2e-16 << 0.05
 # Initial R^2 is 0.9547
 

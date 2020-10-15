@@ -164,7 +164,7 @@ price_H <- lm(log_price~log_carat,data=H)
 price_I <- lm(log_price~log_carat,data=I)
 price_J <- lm(log_price~log_carat,data=J)
 
-plot(log_carat, log_price, main="Price by Carat and Color")
+plot(log_carat, log_price, main="Price by log Carat and Color")
 points(E$log_carat, E$log_price, pch=2, col="chartreuse")
 points(eF$log_carat, eF$log_price, pch=3, col="blue")
 points(G$log_carat, G$log_price, pch=4, col="orange")

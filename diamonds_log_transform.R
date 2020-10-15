@@ -50,9 +50,9 @@ count(diamonds_data, c(color))
 
 # Begin to set up scatters:
 
-# subset by cut, color, and clarity
+# subset price by cut, color, and clarity
 
-p_cut <- c('price', 'cut')
+p_cut <- diamonds_data[c('price', 'cut')]
 p_color <- diamonds_data[c('price', 'color')]
 p_clarity <- diamonds_data[c('price', 'clarity')]
 

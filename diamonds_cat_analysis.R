@@ -31,8 +31,8 @@ boxplot(log_carat~color, main="Boxplot of log Carat and Color")
 boxplot(log_carat~clarity, main="Boxplot of log Carat and Clarity")
 
 boxplot(log_price~cut, main="Boxplot of log Price and Cut")
-boxplot(log_price~color, main="Boxplot of log Price and Cut")
-boxplot(log_price~clarity, main="Boxplot of log Price and Cut")
+boxplot(log_price~color, main="Boxplot of log Price and Color")
+boxplot(log_price~clarity, main="Boxplot of log Price and Clarity")
 
 t_full <- lm(log_price~., data = diamonds_data)
 summary(t_full)

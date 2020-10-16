@@ -1,6 +1,9 @@
 # STAT 6021
 # Proj 1: Diamonds - Categorical Variable Analyses
 
+
+##### These lines are redundant when combined with the prior file
+
 library(MASS) # for Box-Cox
 library(dplyr)
 library(faraway)
@@ -15,14 +18,12 @@ cut <- factor(cut, levels = c('Good', 'Very Good', 'Ideal', 'Astor Ideal'))
 summary(diamonds_data)
 attach(diamonds_data) # attach_
 
-diamonds_data
-head(diamonds_data)
+##### These lines are redundant when combined with the prior file ^^^
 
-diamonds_data <- mutate(diamonds_data, log_carat = log(carat), log_price = log(price)) 
+diamonds_data <- mutate(diamonds_data, log_carat = log(carat), log_price = log(price))  # transform the data
 
-diamonds_data <- diamonds_data[c('log_carat', 'clarity', 'color', 'cut', 'log_price')]
+diamonds_data <- diamonds_data[c('log_carat', 'clarity', 'color', 'cut', 'log_price')] # remove the untransformed data
 
-head(diamonds_data)
 attach(diamonds_data)
 
 # Some variance checks
@@ -35,16 +36,14 @@ boxplot(log_price~cut, main="Boxplot of log Price and Cut")
 boxplot(log_price~color, main="Boxplot of log Price and Color")
 boxplot(log_price~clarity, main="Boxplot of log Price and Clarity")
 
+# run a full model to see how it looks (it looks very complicated)
 t_full <- lm(log_price~., data = diamonds_data)
-summary(t_full)
+summary(t_full) 
 anova(t_full)
 
-unique(cut)
-unique(color)
-unique(clarity)
+cut <- factor(cut)
 
-# redo scatters
-
+# view the qualitative data to see how the data look
 table(clarity, cut)/nrow(diamonds_data) # rel frequency table
 table(clarity, color) # frequency table
 table(color, cut)
@@ -53,30 +52,17 @@ plot(clarity~cut) # frequency plot to check variance; nothing weird
 plot(color~cut) 
 plot(clarity~color) 
 
-plot(cut_group~price) # frequency plot to check variance; nothing weird
-plot(col_group~cut_group)
-plot(cl_group~col_group)
-
-
-plot(clarity, cut, main="log Price by log Carat and Cut") # scatters
-points(I$log_carat, I$log_price, pch=2, col="blue")
-points(VG$log_carat, VG$log_price, pch=3, col="red")
-points(G$log_carat, G$log_price, pch=4, col="orange")
-
-
-## consider each cut as a subset
+# consider each cut as a subset
 AI<-subset(diamonds_data,cut=="Astor Ideal") 
 I<-subset(diamonds_data,cut=="Ideal") 
 VG<-subset(diamonds_data,cut=="Very Good") 
 G<-subset(diamonds_data,cut=="Good") 
-
 
 # fit separate regressions
 price_AI <- lm(log_price~log_carat,data=AI)
 price_I <- lm(log_price~log_carat,data=I)
 price_VG <- lm(log_price~log_carat,data=VG)
 price_G <- lm(log_price~log_carat,data=G)
-
 
 # Astor Ideal is the reference
 
@@ -87,7 +73,6 @@ points(I$log_carat, I$log_price, pch=2, col="blue")
 points(VG$log_carat, VG$log_price, pch=3, col="red")
 points(G$log_carat, G$log_price, pch=4, col="orange")
 
-
 abline(price_AI,lty=1)
 abline(price_I,lty=2, col="blue") 
 abline(price_VG,lty=3, col="red")
@@ -95,17 +80,13 @@ abline(price_G,lty=4, col="orange")
 legend("topleft", c("Astor Ideal", "Ideal", "Very Good", "Good"), lty=c(1, 2, 3, 4), 
        pch=c(1,2,3, 4), col=c("black", "blue", "red", "orange")) 
 
-cut <- factor(cut)
-
 m_cut <- lm(log_price~log_carat + cut, data = diamonds_data)
 
 summary(m_cut)
 
-
 # Tukey tests
 library(lawstat)
 library(multcomp)
-
 
 pairwise<-glht(m_cut, linfct = mcp(cut = "Tukey")) # can group based on cut -> Good and VG, Ideal and Astor Ideal (plus not many of the top kinds in the data)
 summary(pairwise)
@@ -130,7 +111,6 @@ head(sc)
 price_TopCut <- lm(log_price~log_carat,data=tc)
 price_SecondCut <- lm(log_price~log_carat,data=sc)
 
-
 # Create scatters:
 
 # Group the color variables
@@ -138,12 +118,15 @@ price_SecondCut <- lm(log_price~log_carat,data=sc)
 plot(tc$log_carat, tc$log_price, col = 'blue', main="Log Price by Log Carat and Grouped Cut")
 points(sc$log_carat, sc$log_price, pch=2, col="red")
 
-
 abline(price_TopCut,lty=1, col = 'blue')
 abline(price_SecondCut,lty=2, col="red") 
 legend("topleft", c("Top Cut", "Bottom Cut"), lty=c(1, 2), 
        pch=c(1,2), col=c("blue", "red")) 
 grid()
+
+plot(cut_group~price) # frequency plot to check variance; nothing weird
+plot(col_group~cut_group)
+plot(cl_group~col_group)
 
 is.factor(cut_group)
 cut_group <- factor(cut_group, levels = c('Top Cut', 'Bottom Cut'))
@@ -160,8 +143,6 @@ summary(m_cut)
 
 pairwise<-glht(m_cut, linfct = mcp(cut_group = "Tukey")) 
 summary(pairwise)
-
-#colors()[1:50] # R colors for graphs
 
 # color:
 D <-subset(diamonds_data,color=="D") 
@@ -237,7 +218,6 @@ plot(price_bottomc$fitted.values, price_bottomc$residuals, main = 'Residual Plot
 abline(h=0,col="red")
 grid()
 
-
 is.factor(col_group)
 col_group <- factor(col_group, levels = c('Top Col', 'Bottom Col'))
 levels(col_group)
@@ -253,7 +233,6 @@ summary(m_col)
 
 pairwise<-glht(m_col, linfct = mcp(col_group = "Tukey")) 
 summary(pairwise)
-
 
 # clarity:
 FL <-subset(diamonds_data,clarity=="FL") 
@@ -285,8 +264,6 @@ points(VS2$log_carat, VS2$log_price, pch=6, col="bisque1")
 points(SI1$log_carat, SI1$log_price, pch=7, col="blue")
 points(SI2$log_carat, SI2$log_price, pch=8, col="orange")
 
-
-
 abline(price_FL,lty=1, col = "black")
 abline(price_IF,lty=2, col = "chartreuse")
 abline(price_VVS1,lty=3, col="aquamarine")
@@ -299,8 +276,6 @@ abline(price_SI2,lty=8, col="orange")
 
 legend("topleft", c("FL", "IF", "VVS1", "VVS2", "VS1", "VS2", "SI1", "SI2"), lty=c(1, 2, 3, 4, 5, 6, 7, 8), 
        pch=c(1,2,3,4,5,6,7), col=c("black", "chartreuse", "aquamarine", "burlywood", "red", "bisque1", "blue", "orange")) 
-
-
 
 # Group the clarity variables
 
@@ -397,15 +372,10 @@ write.csv(diamonds_data,"C:\\Users\\fuent\\OneDrive\\Desktop\\Master's Program\\
 
 ##############################################
 
-
-
-
 m_clarity <- lm(log_price~log_carat + cl_group)
-
 
 pairwise<-glht(m_clarity, linfct = mcp(cl_group= "Tukey"))
 summary(pairwise)
-
 
 boxplot(log_carat~cut_group, main="Boxplot of log Carat and Grouped Cut")
 boxplot(log_carat~col_group, main="Boxplot of log Carat and Grouped Color")
@@ -415,7 +385,6 @@ boxplot(log_price~cut_group, main="Boxplot of log Price and Grouped Cut")
 boxplot(log_price~col_group, main="Boxplot of log Price and Grouped Color")
 boxplot(log_price~cl_group, main="Boxplot of log Price and Grouped Clarity")
 
-
 m_clarity <- lm(log_price~log_carat + cl_group)
 
 summary(m_clarity)
@@ -424,7 +393,6 @@ summary(m_cut)
 
 m_group <- lm(log_price~log_carat + col_group + cl_group + cut_group)
 m_group2 <- lm(log_price~log_carat + col_group + cl_group)
-
 
 m_col_int <- lm(log_price~ log_carat*col_group)
 m_simple <- lm(log_price~ log_carat)
@@ -440,11 +408,8 @@ summary(m_col_int)
 summary(m_cl_int)
 summary(m_cut_int)
 
-
 anova(m_col_int, m_simple)
-
 anova(m_col, m_col_int)
-
 anova(m_cut, m_group)
 anova(m_col, m_group)
 anova(m_col_int, m_group)
@@ -465,7 +430,6 @@ summary(group_full)
 reduced <- lm(log_price~log_carat*cl_group + log_carat*cut_group + log_carat*col_group)
 summary(reduced)
 anova(reduced)
-
 
 ####FINAL####
 
@@ -501,8 +465,6 @@ boxplot(log_price~cut_group*col_group)
 boxplot(log_price~cl_group*cut_group)
 boxplot(log_price~cl_group*col_group*cut)
 
-
-
 m_group2_red <- lm(log_price~log_carat*col_group + log_carat*cl_group + col_group*cl_group)
 summary(m_group2_red)
 
@@ -520,4 +482,3 @@ anova(m_group_full_int)
 m_group_red <- lm(log_price~log_carat + col_group + cl_group)
 summary(m_group_red)
 anova(m_group_red, m_group_full)
-

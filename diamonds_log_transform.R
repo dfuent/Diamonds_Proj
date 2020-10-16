@@ -5,7 +5,6 @@ library(MASS) # for Box-Cox
 library(dplyr)
 
 diamonds_data<-read.csv("diamonds4.csv", header=TRUE)
-#diamonds_data # display data when uncommented
 
 summary(diamonds_data)
 attach(diamonds_data) # attach
@@ -20,6 +19,7 @@ is.factor(clarity)
 is.factor(color)
 is.factor(cut)
 
+# set levels
 clarity <- factor(clarity, levels = c('SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'))
 color <- factor(color, levels = c('J', 'I', 'H', 'G', 'F', 'E', 'D'))
 cut <- factor(cut, levels = c('Good', 'Very Good', 'Ideal', 'Astor Ideal'))
@@ -36,13 +36,13 @@ is.numeric(carat)
 is.numeric(price)
 
 # 4) run a full regression, summary, and ANOVA. Notice that cut doesn't seem significant
-# based on its t-vals; same with some colors
+# based on its t-vals; same with some colors. But really focus on how complicated this is
 
 r_full <- lm(price~., data = diamonds_data)
 summary(r_full)
 anova(r_full)
 
-# 5) check n per each categorical variable
+# 5) check n per each categorical variable to start thinking about grouping
 
 count(diamonds_data, c(cut))
 count(diamonds_data, c(clarity))
@@ -50,14 +50,7 @@ count(diamonds_data, c(color))
 
 # Begin to set up scatters:
 
-# subset price by cut, color, and clarity
-
-p_cut <- diamonds_data[c('price', 'cut')]
-p_color <- diamonds_data[c('price', 'color')]
-p_clarity <- diamonds_data[c('price', 'clarity')]
-
-
-## consider each cut as a subset
+# consider each cut as a subset
 AI<-subset(diamonds_data,cut=="Astor Ideal") 
 I<-subset(diamonds_data,cut=="Ideal") 
 G<-subset(diamonds_data,cut=="Good") 
@@ -69,12 +62,9 @@ price_I <- lm(price~carat,data=I)
 price_G <- lm(price~carat,data=G)
 price_VG <- lm(price~carat,data=VG)
 
-# summary(price_AI)
-
 # Astor Ideal is the reference
 
 # Create scatters:
-
 plot(carat, price, main="Price by Carat and Cut")
 points(I$carat, I$price, pch=2, col="blue")
 points(G$carat, G$price, pch=3, col="orange")
@@ -89,8 +79,7 @@ legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3,
 
 
 # Clearly a non-linear pattern in the data and lack of residual variance
-# Focus on transforming the data:
-
+# Forget about the categorical variables and focus on price and carat
 price_carat <- lm(price~carat)
 summary(price_carat)
 
@@ -107,11 +96,9 @@ grid()
 boxcox(price_carat, lambda = seq(.27, .33, by = 0.01)) # Box-Cox plot
 grid()
 
-# to fix the variance issue, we can transform price by lambda = 1/3
+# to fix the variance issue, we can transform price by lambda = 1/3, which is slightly out of the CI, but makes sense intuitively v. lambda = 0.31
 
 diamonds_data <- mutate(diamonds_data, cbrt_price = (price)^(1/3))
-
-head(diamonds_data)
 
 attach(diamonds_data)
 
@@ -158,7 +145,6 @@ grid()
 # variance looks better, but a huge non-linear pattern now
 # we can run another transform on y to try to flatten out the pattern
 
-
 t_both_mod <- lm(log_cbrt_price~log_carat)
 
 summary(t_both_mod)
@@ -176,16 +162,16 @@ acf(t_both_mod$residuals)
 boxcox(t_both_mod, lambda = seq(0, .8, by = 0.1)) # Box-Cox plot
 
 # Though this is complicated, we can visually see that the graph is linear. We may want to explore the lag issues on the ACF, though
-# We notice that the Box-Cox plot does not show lambda = 1 in our confidence interval, but this could be due to the size of the dataset;
+# We notice that the Box-Cox plot does not show lambda = 1 in our confidence interval, but this is due to the size of the dataset;
 # as n increases, small changes in residual variance become more pronounced and harder to 'pindown' in our Box-Cox plot.
 
 # Note that our first model (transform on price only) had a funneling out on the residual variance even though it had a an ideal Box-Cox
+# We visually like this new model
 
 # BUT, we know that log(x^a) = a*log(x), so by taking the log of the cube root, we are simply multiplying each x by 1/3, which
 # doesn't matter for our transformation here
 
 # => to simplify, we can use log(price), log(carat)
-
 
 # quick model ANOVA  and summarr
 t_both_mod <- lm(log_price~log_carat)
@@ -194,5 +180,5 @@ summary(t_both_mod)
 anova(t_both_mod)
 
 # it's clear that carat and price have a linear relationship -- F-val is huge w/ p-val 2.2e-16 << 0.05
-# Initial R^2 is 0.9547
+# Initial R^2 is 0.9547, which is very good
 

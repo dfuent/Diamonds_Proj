@@ -312,17 +312,17 @@ fl_cl <- c('FL', 'IF', 'VVS1', 'VVS2')
 vs_cl <- c('VS1', 'VS2')
 
 diamonds_data$cl_group <- ifelse(diamonds_data$clarity %in% fl_cl,
-                                 'Flawless_VVSI', 'Very Slightly')
+                                 'Top Clarity', 'Bottom Clarity')
 
-cl_group <- factor(cl_group, levels = c('Flawless_VVSI', 'Very Slightly'))
+diamonds_data$cl_group <- factor(diamonds_data$cl_group, levels = c('Top Clarity', 'Bottom Clarity'))
 
-levels(cl_group)
+levels(diamonds_data$cl_group)
 
-table(cl_group)
+table(diamonds_data$cl_group)
 
 # clarity:
-FL <-subset(diamonds_data,cl_group=="Flawless_VVSI")
-VS <-subset(diamonds_data,cl_group=="Very Slightly")
+FL <-subset(diamonds_data,cl_group=="Top Clarity")
+VS <-subset(diamonds_data,cl_group=="Bottom Clarity")
 #S <-subset(diamonds_data,cl_group=="Slightly")
 
 head(FL)
@@ -347,6 +347,8 @@ plot(cut_group~price) # frequency plot to check variance; nothing weird
 plot(col_group~cut_group)
 plot(cl_group~col_group)
 
+
+attach(diamonds_data)
 m_clarity <- lm(log_price~log_carat + cl_group)
 
 pairwise<-glht(m_clarity, linfct = mcp(cl_group= "Tukey"))
@@ -359,6 +361,10 @@ boxplot(log_carat~cl_group, main="Boxplot of log Carat and Grouped Clarity")
 boxplot(log_price~cut_group, main="Boxplot of log Price and Grouped Cut")
 boxplot(log_price~col_group, main="Boxplot of log Price and Grouped Color")
 boxplot(log_price~cl_group, main="Boxplot of log Price and Grouped Clarity")
+
+diamonds_data$cl_group <- relevel(cl_group, ref = 'Bottom Clarity')
+levels(cl_group)
+attach(diamonds_data)
 
 m_clarity <- lm(log_price~log_carat + cl_group)
 
@@ -407,7 +413,7 @@ summary(reduced)
 anova(reduced)
 
 ####FINAL MODEL CREATION####
-diamonds_data$cl_group <- relevel(cl_group, ref = 'Very Slightly')
+diamonds_data$cl_group <- relevel(cl_group, ref = 'Bottom Clarity')
 levels(cl_group)
 
 full_int <- lm(log_price~log_carat*cut_group + log_carat*cl_group + log_carat*col_group, data = diamonds_data)
@@ -420,7 +426,7 @@ reduced <- lm(log_price~log_carat + cut_group + cl_group + log_carat*col_group, 
 summary(reduced)
 anova(reduced)
 
-no_int <- lm(log_price~log_carat + cut_group + cl_group, data = diamonds_data)
+no_int <- lm(log_price~log_carat, data = diamonds_data) # + cut_group + cl_group  + col_group
 summary(no_int)
 anova(no_int)
 
@@ -455,4 +461,4 @@ summary(m_group_full_int)
 anova(m_group_full_int)
 m_group_red <- lm(log_price~log_carat + col_group + cl_group)
 summary(m_group_red)
-anova(m_group_red, m_group_full)
+anova(m_group_red, m_group_full_int)

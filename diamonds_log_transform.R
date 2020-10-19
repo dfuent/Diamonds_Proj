@@ -1,15 +1,15 @@
 # STAT 6021
-# Proj 1: Diamonds
+# Proj 1: Diamonds Data Exploration and Transformation
 
 library(MASS) # for Box-Cox
 library(dplyr)
 
 diamonds_data<-read.csv("diamonds4.csv", header=TRUE)
 
-summary(diamonds_data)
-attach(diamonds_data) # attach
+summary(diamonds_data) # show info about the data
+attach(diamonds_data) # attach data
 
-diamonds_data
+# diamonds_data # display data when uncommented
 head(diamonds_data)
 
 # initial data checks:
@@ -19,8 +19,7 @@ is.factor(clarity)
 is.factor(color)
 is.factor(cut)
 
-# set levels
-clarity <- factor(clarity, levels = c('SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'))
+clarity <- factor(clarity, levels = c('SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL')) # set levels
 color <- factor(color, levels = c('J', 'I', 'H', 'G', 'F', 'E', 'D'))
 cut <- factor(cut, levels = c('Good', 'Very Good', 'Ideal', 'Astor Ideal'))
 
@@ -36,13 +35,13 @@ is.numeric(carat)
 is.numeric(price)
 
 # 4) run a full regression, summary, and ANOVA. Notice that cut doesn't seem significant
-# based on its t-vals; same with some colors. But really focus on how complicated this is
+# based on its t-vals; same with some colors
 
 r_full <- lm(price~., data = diamonds_data)
 summary(r_full)
 anova(r_full)
 
-# 5) check n per each categorical variable to start thinking about grouping
+# 5) check number per each categorical variable
 
 count(diamonds_data, c(cut))
 count(diamonds_data, c(clarity))
@@ -50,7 +49,13 @@ count(diamonds_data, c(color))
 
 # Begin to set up scatters:
 
-# consider each cut as a subset
+# subset by cut, color, and clarity
+
+p_cut <- c('price', 'cut')
+p_color <- diamonds_data[c('price', 'color')]
+p_clarity <- diamonds_data[c('price', 'clarity')]
+
+## consider each cut as a subset
 AI<-subset(diamonds_data,cut=="Astor Ideal") 
 I<-subset(diamonds_data,cut=="Ideal") 
 G<-subset(diamonds_data,cut=="Good") 
@@ -65,6 +70,7 @@ price_VG <- lm(price~carat,data=VG)
 # Astor Ideal is the reference
 
 # Create scatters:
+
 plot(carat, price, main="Price by Carat and Cut")
 points(I$carat, I$price, pch=2, col="blue")
 points(G$carat, G$price, pch=3, col="orange")
@@ -77,9 +83,9 @@ abline(price_VG,lty=4, col="red")
 legend("topleft", c("Astor Ideal", "Ideal", "Good", "Very Good"), lty=c(1, 2, 3, 4), 
        pch=c(1,2,12), col=c("black", "blue", "orange", "red")) 
 
-
 # Clearly a non-linear pattern in the data and lack of residual variance
-# Forget about the categorical variables and focus on price and carat
+# Focus on transforming the data:
+
 price_carat <- lm(price~carat)
 summary(price_carat)
 
@@ -96,9 +102,11 @@ grid()
 boxcox(price_carat, lambda = seq(.27, .33, by = 0.01)) # Box-Cox plot
 grid()
 
-# to fix the variance issue, we can transform price by lambda = 1/3, which is slightly out of the CI, but makes sense intuitively v. lambda = 0.31
+# to fix the variance issue, we can transform price by lambda = 1/3
 
 diamonds_data <- mutate(diamonds_data, cbrt_price = (price)^(1/3))
+
+head(diamonds_data)
 
 attach(diamonds_data)
 
@@ -118,9 +126,8 @@ boxcox(t_price_mod, lambda = seq(.5, 1.2, by = 0.1)) # Box-Cox plot
 grid()
 
 # We've corrected for the variance issue on y more or less using cuberoot
-
 # need to transform carat (looks like a non-linear relationship)
-# From the scatter plot, we see a potentially log or sqrt function. We'll try log first
+# From the scatter plot, we see a potentially log or sqrt function. We'll end up with log
 
 diamonds_data <- mutate(diamonds_data, log_carat = log(carat), 
                         log_cbrt_price = log(price^(1/3)), log_price = log(price))
@@ -149,7 +156,7 @@ t_both_mod <- lm(log_cbrt_price~log_carat)
 
 summary(t_both_mod)
 
-plot(log_cbrt_price~log_carat, main = "Log of Cuberoot Price by Log Carat")
+plot(log_cbrt_price~log_carat, main = "Log of Cuberoot Price by Log Carat") # this is the same as log of price; no need for cube root
 abline(t_both_mod, col = 'red')
 grid()
 
@@ -161,24 +168,25 @@ acf(t_both_mod$residuals)
 
 boxcox(t_both_mod, lambda = seq(0, .8, by = 0.1)) # Box-Cox plot
 
-# Though this is complicated, we can visually see that the graph is linear. We may want to explore the lag issues on the ACF, though
-# We notice that the Box-Cox plot does not show lambda = 1 in our confidence interval, but this is due to the size of the dataset;
+qqnorm(t_both_mod$residuals)
+qqline(t_both_mod$residuals, col="red", main="Normal Q-Q Initial")
+
+# Though this is complicated, we can visually see that the graph is linear. We may want to explore the lag issues on the ACF
+# We notice that the Box-Cox plot does not show lambda = 1 in our confidence interval, but this could be due to the size of the dataset;
 # as n increases, small changes in residual variance become more pronounced and harder to 'pindown' in our Box-Cox plot.
 
 # Note that our first model (transform on price only) had a funneling out on the residual variance even though it had a an ideal Box-Cox
-# We visually like this new model
 
 # BUT, we know that log(x^a) = a*log(x), so by taking the log of the cube root, we are simply multiplying each x by 1/3, which
 # doesn't matter for our transformation here
 
 # => to simplify, we can use log(price), log(carat)
 
-# quick model ANOVA  and summarr
+# quick model ANOVA  and summary
 t_both_mod <- lm(log_price~log_carat)
 
 summary(t_both_mod)
 anova(t_both_mod)
 
-# it's clear that carat and price have a linear relationship -- F-val is huge w/ p-val 2.2e-16 << 0.05
-# Initial R^2 is 0.9547, which is very good
-
+# it's clear that carat and price have a linear relationship -- F-val is huge w/ p-val 0.05 >> 2.2e-16
+# Initial R^2 is 0.9547

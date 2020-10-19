@@ -1,7 +1,6 @@
 # STAT 6021
 # Proj 1: Diamonds - Categorical Variable Analyses
 
-
 ##### From this line until 21 is redundant when combined with the prior file
 
 library(MASS) # for Box-Cox
@@ -9,7 +8,6 @@ library(dplyr)
 library(faraway)
 
 diamonds_data<-read.csv("diamonds4.csv", header=TRUE)
-#diamonds_data # display data when uncommented
 
 clarity <- factor(clarity, levels = c('SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF', 'FL'))
 color <- factor(color, levels = c('J', 'I', 'H', 'G', 'F', 'E', 'D'))
@@ -18,6 +16,7 @@ cut <- factor(cut, levels = c('Good', 'Very Good', 'Ideal', 'Astor Ideal'))
 summary(diamonds_data)
 attach(diamonds_data) # attach_
 
+count(diamonds_data)
 ##### These lines are redundant when combined with the prior file ^^^
 
 diamonds_data <- mutate(diamonds_data, log_carat = log(carat), log_price = log(price))  # transform the data
@@ -26,12 +25,12 @@ diamonds_data <- diamonds_data[c('log_carat', 'clarity', 'color', 'cut', 'log_pr
 
 attach(diamonds_data)
 
-# Some variance checks
-boxplot(log_carat~cut, main="Boxplot of log Carat and Cut")
+# Some box plots to check data shape and variance  
+boxplot(log_carat~cut, main="Boxplot of log Carat and Cut") # carat box plots
 boxplot(log_carat~color, main="Boxplot of log Carat and Color")
 boxplot(log_carat~clarity, main="Boxplot of log Carat and Clarity")
 
-boxplot(log_price~cut, main="Boxplot of log Price and Cut")
+boxplot(log_price~cut, main="Boxplot of log Price and Cut") # price box plots
 boxplot(log_price~color, main="Boxplot of log Price and Color")
 boxplot(log_price~clarity, main="Boxplot of log Price and Clarity")
 
@@ -47,7 +46,7 @@ table(clarity, cut)/nrow(diamonds_data) # rel frequency table
 table(clarity, color) # frequency table
 table(color, cut)
 
-plot(clarity~cut) # frequency plot to check variance; nothing weird
+plot(clarity~cut) # frequency plot to check variance; nothing weird. Notice classes with very few data points
 plot(color~cut) 
 plot(clarity~color) 
 
@@ -98,7 +97,7 @@ diamonds_data$cut_group <- ifelse(diamonds_data$cut %in% top, 'Top Cut', 'Bottom
 
 head(diamonds_data)
 
-## consider each cut as a subset
+# consider each cut as a subset
 tc<-subset(diamonds_data,cut_group=="Top Cut") 
 sc<-subset(diamonds_data,cut_group=="Bottom Cut") 
 
@@ -347,7 +346,6 @@ plot(cut_group~price) # frequency plot to check variance; nothing weird
 plot(col_group~cut_group)
 plot(cl_group~col_group)
 
-
 attach(diamonds_data)
 m_clarity <- lm(log_price~log_carat + cl_group)
 
@@ -422,11 +420,16 @@ anova(full_int)
 
 levels(cl_group)
 
-reduced <- lm(log_price~log_carat + cut_group + cl_group + log_carat*col_group, data = diamonds_data)
+reduced <- lm(log_price~log_carat + cut_group + cl_group + log_carat*col_group, data = diamonds_data) # interaction on color
 summary(reduced)
 anova(reduced)
 
-no_int <- lm(log_price~log_carat, data = diamonds_data) # + cut_group + cl_group  + col_group
+additive <- lm(log_price~log_carat + col_group + cl_group + cut_group, data = diamonds_data) # full additive
+summary(additive)
+anova(additive)
+
+# final model:
+no_int <- lm(log_price~log_carat, data = diamonds_data) # + cut_group + cl_group  + col_group # add the variables back in for full; removed 1 by one to analyze
 summary(no_int)
 anova(no_int)
 
@@ -435,12 +438,11 @@ anova(no_int, reduced)
 vif(reduced)
 vif(no_int)
 vif(full_int)
-#write.csv(diamonds_data,"C:\\Users\\fuent\\OneDrive\\Desktop\\Master's Program\\STAT 6021\\Project\\df.csv", row.names = FALSE)
-
 ######
 
-anova(reduced, group_full)
+# full interaction analysis (proved too complicated and not significant besides for color)
 
+# these box plots were just to view the data with interactions
 boxplot(log_price~cl_group*col_group)
 boxplot(log_price~cut_group*col_group)
 boxplot(log_price~cl_group*cut_group)
